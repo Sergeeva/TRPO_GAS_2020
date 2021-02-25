@@ -22,7 +22,7 @@
 
 int main(int argc, char** argv) {
   
-  char* fin_name = "ton_signal_4.wav";
+  char* fin_name = "ton_signal_3.wav";
   if(argc > 1){
     fin_name = argv[1];
   }
@@ -34,60 +34,6 @@ int main(int argc, char** argv) {
   } else {
     printf("OPEN FILE [%s] is OK \n", fin_name);
   }
-<<<<<<< HEAD
-
-  char* f_out_name = "python/output.dat";
-  FILE* f_out = fopen(f_out_name, "wb");
-  if(f_out == NULL){
-    printf("ERROR in OPEN FILE [%s] \n", f_out_name);
-	  return 1;
-  } else {
-    printf("OPEN FILE [%s] is OK \n", f_out_name);
-  }
-
-  // Reading a header of file  
-  t_wavhdr header;
-  readHeader(&header, f_in);
-
-  int N = 1024;
-
-  // Calculate the number of portions and the tail size
-  int portions_info[2]; //[PortionQuantity, TailSize]
-  calcPortions(&portions_info[0], &header, N);
-
-  // initialising accumulation 
-  int halfN = N/2+1;
-  double acc[halfN]; 
-  memset(acc, 0.0, sizeof acc);
-  
-  // Reading portions + FFT + accumulation till the end in cycle
-  int i; double data_portion[N]; double sq[halfN]; 
-  for(i = 0; i < portions_info[0]; ++i){
-      readData(&data_portion[0], N, f_in );
-
-      fftsq(&data_portion[0], &sq[0], halfN);
- 
-      accumulation(&acc[0], &sq[0], halfN);
-  }
-
-  // Reading tail + FFT + accumulation
-  if (portions_info[1] > 0) {
-    memset(data_portion, 0.0, sizeof data_portion);
-    readData(&data_portion[0], portions_info[1], f_in );
-
-    fftsq(&data_portion[0], &sq[0], halfN);
- 
-    accumulation(&acc[0], &sq[0], halfN);
-  }
-
-  int a;
-  for (a = 0; a < halfN; ++a)
-    fprintf(f_out, "%f\n", acc[a]);
-
-  fclose(f_in);
-  fclose(f_out);
-  
-=======
 
   char* f_out_name = "python/output.dat";
   FILE* f_out = fopen(f_out_name, "wb");
@@ -111,13 +57,19 @@ struct timeval tv_start, tv_end;
   calcPortions(&portions_info[0], &header, N);
 
   // initialising accumulation 
-  int halfN = N;
+  int halfN = N / 2 + 1;
   double acc[halfN]; 
   memset(acc, 0.0, sizeof acc);
 
   int i; double data_portion[N]; double sq[halfN]; 
+  for (i = 0; i < portions_info[0]; i++) {
+	  readData(&data_portion[0], N, f_in);
+
+	  fftsq(&data_portion[0], &sq[0], halfN);
+	  accumulation(&acc[0], &sq[0], halfN);
+  }
    gettimeofday(&tv_start, NULL);
-      fftsq(&data_portion[0], &sq[0], halfN);
+      
 
   gettimeofday(&tv_end, NULL);
   // Reading portions + FFT + accumulation till the end in cycle
@@ -144,8 +96,7 @@ struct timeval tv_start, tv_end;
 
   fclose(f_in);
   fclose(f_out);
-  printf("Time elapsed for programm: %ld microsecs \n", (long int)((tv_end.tv_sec-tv_start.tv_sec)*1000000 + (tv_end.tv_usec - tv_start.tv_usec)));
+  printf("Time elapsed for programm: %ld mcrsec \n", (long int)((tv_end.tv_sec-tv_start.tv_sec)*1000000 + (tv_end.tv_usec - tv_start.tv_usec)));
     
->>>>>>> 24ea634e457da5cc95e9ee851af80a550fe7c8b7
   return 0;
 }
